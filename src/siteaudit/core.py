@@ -16,8 +16,8 @@ class Context:
     delay: float = 0.0
 
 
-CheckFn = Callable[[Context], "list[Finding]"]
-REGISTRY: "dict[str, CheckFn]" = {}
+CheckFn = Callable[[Context], list[Finding]]
+REGISTRY: dict[str, CheckFn] = {}
 
 
 def register(name: str) -> Callable[[CheckFn], CheckFn]:
