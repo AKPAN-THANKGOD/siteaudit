@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Optional
 from urllib.parse import urlsplit
 
 from . import __version__
@@ -11,7 +10,6 @@ from .http import fetch
 from .models import Severity
 from .report import RENDERERS
 from .scanner import scan
-from . import checks  # noqa: F401
 
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
@@ -37,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def main(argv: Optional["list[str]"] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     target = args.url if "://" in args.url else f"https://{args.url}"
     host = urlsplit(target).hostname or ""

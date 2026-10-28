@@ -5,13 +5,12 @@ import ssl
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from typing import Optional
 
 USER_AGENT = "siteaudit/0.1 (authorized security audit)"
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: D401
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
 
@@ -19,17 +18,17 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 class Response:
     url: str
     status: int
-    headers: "list[tuple[str, str]]" = field(default_factory=list)
+    headers: list[tuple[str, str]] = field(default_factory=list)
     body: bytes = b""
 
-    def header(self, name: str) -> Optional[str]:
+    def header(self, name: str) -> str | None:
         name = name.lower()
         for key, value in self.headers:
             if key.lower() == name:
                 return value
         return None
 
-    def header_all(self, name: str) -> "list[str]":
+    def header_all(self, name: str) -> list[str]:
         name = name.lower()
         return [v for k, v in self.headers if k.lower() == name]
 
@@ -46,12 +45,12 @@ def fetch(
     url: str,
     *,
     method: str = "GET",
-    headers: Optional[dict] = None,
+    headers: dict | None = None,
     timeout: float = 10.0,
     follow_redirects: bool = True,
     verify: bool = True,
     max_bytes: int = 262_144,
-) -> Optional[Response]:
+) -> Response | None:
     """Fetch a URL. Returns None on connection/TLS failure; HTTP errors are returned as responses."""
     handlers: list = []
     if not verify:

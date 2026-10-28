@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from . import __version__, checks  # noqa: F401  (importing checks registers them)
 from .core import REGISTRY, Context
@@ -13,9 +12,9 @@ from .models import Finding
 @dataclass
 class ScanResult:
     target: str
-    findings: "list[Finding]" = field(default_factory=list)
-    errors: "list[str]" = field(default_factory=list)
-    checks_run: "list[str]" = field(default_factory=list)
+    findings: list[Finding] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    checks_run: list[str] = field(default_factory=list)
     duration: float = 0.0
     version: str = __version__
 
@@ -24,7 +23,7 @@ def scan(
     target: str,
     base: Response,
     *,
-    only: Optional["list[str]"] = None,
+    only: list[str] | None = None,
     timeout: float = 10.0,
     verify: bool = True,
     delay: float = 0.0,
@@ -38,7 +37,7 @@ def scan(
         result.checks_run.append(name)
         try:
             result.findings.extend(fn(ctx))
-        except Exception as exc:  # a broken check must never abort the whole audit
+        except Exception as exc:  # noqa: BLE001 - a broken check must never abort the audit
             result.errors.append(f"{name}: {type(exc).__name__}: {exc}")
     result.findings.sort(key=lambda f: (-int(f.severity), f.check_id))
     result.duration = time.monotonic() - started
