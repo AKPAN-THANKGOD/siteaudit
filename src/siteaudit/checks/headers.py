@@ -7,8 +7,8 @@ from ..core import Context, register
 from ..models import Finding, Severity
 
 
-def parse_csp(value: str) -> "dict[str, list[str]]":
-    directives: "dict[str, list[str]]" = {}
+def parse_csp(value: str) -> dict[str, list[str]]:
+    directives: dict[str, list[str]] = {}
     for part in value.split(";"):
         bits = part.strip().split()
         if bits:
@@ -17,9 +17,9 @@ def parse_csp(value: str) -> "dict[str, list[str]]":
 
 
 @register("headers")
-def run(ctx: Context) -> "list[Finding]":
+def run(ctx: Context) -> list[Finding]:
     r, url = ctx.base, ctx.target
-    out: "list[Finding]" = []
+    out: list[Finding] = []
 
     def add(slug, title, sev, desc, fix, evidence=""):
         out.append(Finding(f"headers.{slug}", title, sev, desc, fix, url, evidence))
@@ -32,7 +32,7 @@ def run(ctx: Context) -> "list[Finding]":
                 "Without HSTS, browsers may be downgraded to HTTP by a network attacker.",
                 "Send `Strict-Transport-Security: max-age=31536000; includeSubDomains`.")
         else:
-            m = re.search(r"max-age\s*=\s*(\d+)", hsts, re.I)
+            m = re.search(r"max-age\s*=\s*(\d+)", hsts, re.IGNORECASE)
             if not m:
                 add("hsts-invalid", "HSTS header has no max-age", Severity.MEDIUM,
                     "A policy without max-age is ignored by browsers.",

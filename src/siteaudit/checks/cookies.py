@@ -6,13 +6,13 @@ import re
 from ..core import Context, register
 from ..models import Finding, Severity
 
-SENSITIVE = re.compile(r"(sess|sid|auth|token|jwt|login|remember)", re.I)
+SENSITIVE = re.compile(r"(sess|sid|auth|token|jwt|login|remember)", re.IGNORECASE)
 
 
-def parse_set_cookie(raw: str) -> "tuple[str, dict[str, str]]":
+def parse_set_cookie(raw: str) -> tuple[str, dict[str, str]]:
     parts = [p.strip() for p in raw.split(";")]
     name = parts[0].split("=", 1)[0].strip()
-    attrs: "dict[str, str]" = {}
+    attrs: dict[str, str] = {}
     for part in parts[1:]:
         key, _, value = part.partition("=")
         attrs[key.strip().lower()] = value.strip()
@@ -20,10 +20,10 @@ def parse_set_cookie(raw: str) -> "tuple[str, dict[str, str]]":
 
 
 @register("cookies")
-def run(ctx: Context) -> "list[Finding]":
+def run(ctx: Context) -> list[Finding]:
     https = ctx.target.lower().startswith("https://")
-    missing: "dict[str, list[str]]" = {"secure": [], "httponly": [], "samesite": [], "none": []}
-    sensitive_missing: "dict[str, list[str]]" = {"secure": [], "httponly": []}
+    missing: dict[str, list[str]] = {"secure": [], "httponly": [], "samesite": [], "none": []}
+    sensitive_missing: dict[str, list[str]] = {"secure": [], "httponly": []}
 
     for raw in ctx.base.header_all("set-cookie"):
         name, attrs = parse_set_cookie(raw)
@@ -44,7 +44,7 @@ def run(ctx: Context) -> "list[Finding]":
         elif samesite == "none" and "secure" not in attrs:
             missing["none"].append(name)
 
-    out: "list[Finding]" = []
+    out: list[Finding] = []
 
     def add(slug, title, sev, desc, fix, names):
         if names:

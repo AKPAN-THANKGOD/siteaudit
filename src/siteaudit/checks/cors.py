@@ -9,8 +9,8 @@ PROBE_ORIGIN = "https://siteaudit-probe.example"
 
 
 @register("cors")
-def run(ctx: Context) -> "list[Finding]":
-    out: "list[Finding]" = []
+def run(ctx: Context) -> list[Finding]:
+    out: list[Finding] = []
     for index, origin in enumerate((PROBE_ORIGIN, "null")):
         r = fetch(ctx.target, headers={"Origin": origin}, timeout=ctx.timeout, verify=ctx.verify)
         if r is None:

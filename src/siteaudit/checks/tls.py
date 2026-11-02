@@ -4,7 +4,6 @@ from __future__ import annotations
 import socket
 import ssl
 import time
-from typing import Optional
 from urllib.parse import urlsplit
 
 from ..core import Context, register
@@ -12,15 +11,15 @@ from ..http import fetch
 from ..models import Finding, Severity
 
 
-def days_until_expiry(cert: dict, now: Optional[float] = None) -> float:
+def days_until_expiry(cert: dict, now: float | None = None) -> float:
     expires = ssl.cert_time_to_seconds(cert["notAfter"])
     return (expires - (now if now is not None else time.time())) / 86400
 
 
 @register("tls")
-def run(ctx: Context) -> "list[Finding]":
+def run(ctx: Context) -> list[Finding]:
     parts = urlsplit(ctx.target)
-    out: "list[Finding]" = []
+    out: list[Finding] = []
 
     if parts.scheme == "http":
         r = fetch(ctx.target, follow_redirects=False, timeout=ctx.timeout)
@@ -37,9 +36,9 @@ def run(ctx: Context) -> "list[Finding]":
     host, port = parts.hostname, parts.port or 443
     try:
         context = ssl.create_default_context()
-        with socket.create_connection((host, port), timeout=ctx.timeout) as sock:
-            with context.wrap_socket(sock, server_hostname=host) as tls:
-                cert, version = tls.getpeercert(), tls.version()
+        conn = socket.create_connection((host, port), timeout=ctx.timeout)
+        with conn, context.wrap_socket(conn, server_hostname=host) as tls:
+            cert, version = tls.getpeercert(), tls.version()
     except ssl.SSLCertVerificationError as err:
         out.append(Finding("tls.certificate-invalid", "TLS certificate failed verification",
                            Severity.HIGH,

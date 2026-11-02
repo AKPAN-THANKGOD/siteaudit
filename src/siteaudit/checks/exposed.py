@@ -16,7 +16,7 @@ from ..core import Context, register
 from ..http import Response, fetch
 from ..models import Finding, Severity
 
-_ENV_LINE = re.compile(rb"^[A-Za-z_][A-Za-z0-9_]*\s*=", re.M)
+_ENV_LINE = re.compile(rb"^[A-Za-z_][A-Za-z0-9_]*\s*=", re.MULTILINE)
 
 
 def _not_html(r: Response) -> bool:
@@ -71,8 +71,8 @@ PROBES = [
 
 
 @register("exposed")
-def run(ctx: Context) -> "list[Finding]":
-    out: "list[Finding]" = []
+def run(ctx: Context) -> list[Finding]:
+    out: list[Finding] = []
     for probe in PROBES:
         url = urljoin(ctx.target, probe.path)
         r = fetch(url, timeout=ctx.timeout, verify=ctx.verify, follow_redirects=False)
