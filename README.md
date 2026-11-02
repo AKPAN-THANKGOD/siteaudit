@@ -11,6 +11,13 @@ code scanning via **SARIF**.
 > ⚠️ **Authorized use only.** Scan systems you own or have written permission to test.
 > Non-local targets require the explicit `--authorized` flag.
 
+## Screenshot
+
+HTML report from scanning the bundled demo server: severity-coded findings, evidence, and a fix for each.
+Secret values are never included, only status and size.
+
+![siteaudit HTML report showing a critical exposed .env file and a high-severity CORS misconfiguration](docs/report-screenshot.png)
+
 ## Install
 
 ```bash
@@ -30,6 +37,18 @@ siteaudit https://staging.example.com --authorized --checks headers,cookies
 
 Exit codes: `0` clean (below `--fail-on`), `1` findings at/above threshold, `2` usage or
 authorization error, `3` target unreachable.
+
+## Try it in 30 seconds (no setup, no Docker)
+
+The repo ships with a deliberately insecure demo server (fake secrets, sloppy headers, localhost only):
+
+```bash
+python examples/vulnerable_server.py          # terminal 1
+siteaudit http://127.0.0.1:8000 -f html -o report.html --fail-on none   # terminal 2
+```
+
+Open `report.html` to see the findings. You can also point siteaudit at
+[OWASP Juice Shop](https://owasp.org/www-project-juice-shop/) or DVWA if you run them locally.
 
 ## What it checks
 
